@@ -103,7 +103,29 @@ header-includes:
 
 ![Создание файла](image/2.png){#fig:002 width=70%}
 
-3. С помощью функциональной клавиши F4 откроем файл lab5-1.asm для редактирования во встроенном редакторе и напечатаем следующий текст программы:(@fig:003)
+3. С помощью функциональной клавиши F4 откроем файл lab5-1.asm для редактирования во встроенном редакторе и напечатаем следующий текст программы (@fig:003)
+```SECTION .data
+msg: DB 'Введите строку:', 10
+msgLen: EQU $-msg
+SECTION .bss
+buf1: RESB 80
+SECTION .text
+GLOBAL _start
+_start:
+mov eax,4
+mov ebx,1
+mov ecx,msg
+mov edx,msgLen
+int 80h
+mov eax,3
+mov ebx,0
+mov ecx,buf1
+mov edx,80
+int 80h
+mov eax,1
+mov ebx,0
+int 80h```
+
 
 ![Текст программы](image/3.png){#fig:003 width=70%}
 
@@ -124,6 +146,22 @@ lab5-2.asm.(@fig:006)
 
 6. Исправим текст программы в файле lab5-2.asm с использованием подпрограмм из
 внешнего файла in_out.asm (используем подпрограммы sprintLF, sread и quit)(@fig:007)
+```%include 'in_out.asm'
+SECTION .data
+msg: DB 'Введите строку:',0h
+SECTION .bss
+buf1: RESB 80
+SECTION .text
+GLOBAL _start
+_start:
+mov eax,msg
+call sprint
+mov ecx, buf1
+mov edx,80
+call sread
+call quit```
+
+
 
 ![Использование подпрограмм из файла in_out.asm](image/7.png){#fig:007 width=70%}
 
@@ -140,6 +178,48 @@ lab5-2.asm.(@fig:006)
 • вывести приглашение типа “Введите строку:”;
 • ввести строку с клавиатуры;
 • вывести введённую строку на экран.(@fig:009)
+```SECTION .data
+msg: DB 'Введите строку:',10
+msgLen: EQU $-msg
+inputPrompt: DB 'Введенная строка:',10
+inputPromptLen: EQU $-inputPrompt
+SECTION .bss
+buf1: RESB 80
+SECTION .text
+GLOBAL _start
+
+_start:
+    ; Вывести приглашение "Введите строку:"
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, msg
+    mov edx, msgLen
+    int 80h
+
+    ; Ввести строку с клавиатуры
+    mov eax, 3
+    mov ebx, 0
+    mov ecx, buf1
+    mov edx, 80
+    int 80h
+
+    ; Вывести введенную строку на экран
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, inputPrompt
+    mov edx, inputPromptLen
+    int 80h
+
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, buf1
+    mov edx, 80
+    int 80h
+
+    ; Завершить программу
+    mov eax, 1
+    xor ebx, ebx
+    int 80h```
 
 ![Видоизменённая программа без использования внешнего файла in_out.asm](image/9.png){#fig:009 width=70%}
 
@@ -154,6 +234,29 @@ lab5-2.asm.(@fig:006)
 • вывести приглашение типа “Введите строку:”;
 • ввести строку с клавиатуры;
 • вывести введённую строку на экран.(@fig:011)
+```%include 'in_out.asm'
+SECTION .data
+msg: DB 'Введите строку: ',0h
+SECTION .bss
+buf1: RESB 80
+SECTION .text
+GLOBAL _start
+_start:
+; Вывести приглашение "Введите строку:"
+mov eax, msg
+call sprintLF
+
+; Ввести строку с клавиатуры
+mov ecx, buf1
+mov edx, 80
+call sread
+
+; Вывести введенную строку на экран
+mov eax, buf1
+call sprintLF
+
+call quit```
+
 
 ![Видоизменённая программа с писпользованием внешнего файла in_out.asm](image/11.png){#fig:011 width=70%}
 
